@@ -5,10 +5,14 @@ using System;
 
 public class chub_motion : MonoBehaviour
 {
-    private float speed = .5f;
+    public float speed = .5f;
+    public float turnSmoothTime = 0.1f;
     public float jumpForce = 2.0f;
     public float gravityForce = 0.2f;
 
+    public Transform cam;
+
+    float turnV;
     private Vector3 jump;
     private Vector3 gravity;
     private bool isGrounded;
@@ -17,23 +21,16 @@ public class chub_motion : MonoBehaviour
 
 
     private Vector3 respawnloc;
-    private Vector3 respawnlocforcam;
-    private Vector3[] listOfCameras;
 
     Rigidbody rb;
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
         rb = GetComponent<Rigidbody>();
         jump = new Vector3(0.0f, 2.0f, 0.0f);
         gravity = new Vector3(0.0f, -1.0f, 0.0f);
         respawnloc = new Vector3(-5f, 7f, 5f);
-        main_cam = GameObject.Find("Main Camera");
-
-        listOfCameras = new Vector3[10];
-        listOfCameras[0] = new Vector3(74f, 3.84f, -8.49f);
-
-
 
     }
 
@@ -55,17 +52,23 @@ public class chub_motion : MonoBehaviour
         if (transform.position.y < -5){
             //on death move char and cam
             transform.position = respawnloc;
-            respawnlocforcam = main_cam.GetComponent<Transform>().position;
-            respawnlocforcam.x = respawnloc.x;
-            main_cam.GetComponent<Transform>().position = respawnlocforcam;
-
         }
 
         //movement
         float hInput = Input.GetAxisRaw("Horizontal");
         float vInput = Input.GetAxisRaw("Vertical");
-        Vector3 mov = new Vector3(hInput, 0, vInput);
-        transform.position += mov * speed;
+        //basic wasd up down, use normalized so no speedup when 2 buttons pressed
+        Vector3 mov = new Vector3(hInput, 0, vInput).normalized;
+
+        if(mov.magnitude >= .1f){
+            float ang = Mathf.Atan2(mov.x, mov.y) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float ang2 = Mathf.SmoothDampAngle(transform.eulerAngles.y, ang, ref turnV, turnSmoothTime);
+            //idk some math
+            transform.rotation = Quaternion.Euler(0f, ang2, 0f);
+
+            Vector3 dir = Quaternion.Euler(0f, ang, 0f) * Vector3.forward;
+            transform.position += dir.normalized * speed * Time.deltaTime;
+        }
 
         if (Input.GetKey("space") && isGrounded){
             rb.AddForce(jump * jumpForce, ForceMode.Impulse);
