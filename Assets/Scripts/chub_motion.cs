@@ -5,7 +5,7 @@ using System;
 
 public class chub_motion : MonoBehaviour
 {
-    public float speed;
+    private float speed = .5f;
     public float jumpForce = 2.0f;
     public float gravityForce = 0.2f;
 
@@ -18,6 +18,7 @@ public class chub_motion : MonoBehaviour
 
     private Vector3 respawnloc;
     private Vector3 respawnlocforcam;
+    private Vector3[] listOfCameras;
 
     Rigidbody rb;
     // Start is called before the first frame update
@@ -29,11 +30,20 @@ public class chub_motion : MonoBehaviour
         respawnloc = new Vector3(-5f, 7f, 5f);
         main_cam = GameObject.Find("Main Camera");
 
+        listOfCameras = new Vector3[10];
+        listOfCameras[0] = new Vector3(74f, 3.84f, -8.49f);
+
+
+
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "floor") isGrounded = true;
+        if (collision.gameObject.tag == "floor") isGrounded = true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
     }
     // Update is called once per frame
     void FixedUpdate()
