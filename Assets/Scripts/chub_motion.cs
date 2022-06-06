@@ -31,9 +31,9 @@ public class chub_motion : MonoBehaviour
 
     }
 
-    void OnCollisionStay(){
-        isGrounded = true;
-
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.name == "floor") isGrounded = true;
     }
     // Update is called once per frame
     void FixedUpdate()
